@@ -1,0 +1,120 @@
+import json
+import datetime
+import requests
+from start import get_settings
+
+settings = get_settings()
+api_key = settings.github_api_key
+
+GITHUB_USER = 'rkaufman13'
+REPO_NAME = 'Brookland-recipe-buddy'
+
+
+def gh_sesh(user, token):
+    s = requests.Session()
+    s.auth = (user, token)
+    s.headers = {'accept': 'application/vnd.github.v3+json'}
+    return s
+
+class GithubResponseObj:
+    def __init__(self, json_all, next_page):
+        self.json_all = json_all
+        self.next_page = next_page
+
+def gh_get_request(s, url):
+    response = s.get(url)
+    response_status = response.status_code
+    if response_status > 200:
+        print(f'\n This was the response code: {response_status}')
+        exit()
+
+    json = response.json()
+    links = response.links
+
+    try:
+        next_page = links['next']['url']
+    except:
+        next_page = None
+
+    full = GithubResponseObj(json, next_page)
+
+    return full
+
+def gh_post_request(s, url, data):
+    response = s.post(url, data)
+    response_status = response.status_code
+    if response_status > 201:
+        print(f'\n This was the response code: {response_status}')
+        exit()
+
+    json = response.json()
+
+    return json
+
+s = gh_sesh(GITHUB_USER, api_key)
+
+
+
+def get_branch_sha(branch_name="master"):
+
+    url = f'https://api.github.com/repos/{GITHUB_USER}/{REPO_NAME}/branches/{branch_name}'
+    response =gh_get_request(s, url)
+    sha = response.json_all['commit']['sha']
+    return sha
+
+def create_tree(base_tree_sha):
+    url = f'https://api.github.com/repos/{GITHUB_USER}/{REPO_NAME}/git/trees'
+    new_tree = {
+        "base_tree": base_tree_sha,
+        "tree": [{"path":"file.rb","mode":"100644","type":"blob","content":"hi i'm a thing"}]
+    }
+    data = json.dumps(new_tree)
+    response = gh_post_request(s, url, data)
+    return response.get('sha')
+
+def create_new_branch(master_branch_sha):
+    now = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M")
+    new_sync_branch = f'new_branch_{now}'
+    url = f"https://api.github.com/repos/{GITHUB_USER}/{REPO_NAME}/git/refs"
+
+    ref = f'heads/{new_sync_branch}'
+
+    data = {
+        "ref": f'refs/{ref}',
+        "sha": master_branch_sha
+    }
+
+    data = json.dumps(data)
+
+    response =gh_post_request(s, url, data)
+
+    return response, ref
+
+def create_commit(new_sha, main_sha):
+    url = f' https://api.github.com/repos/{GITHUB_USER}/{REPO_NAME}/git/commits'
+    commit = {
+        'message': 'commit created by api',
+        'parents': [main_sha],
+        'tree': new_sha
+    }
+    data = json.dumps(commit)
+    response = gh_post_request(s,url, data)
+    return response.get('sha')
+
+def update_ref_pointer(new_ref,new_sha):
+    url = f'https://api.github.com/repos/{GITHUB_USER}/{REPO_NAME}/git/refs/{new_ref}'
+    new_pointer = {"sha":new_sha,"force":True}
+    data = json.dumps(new_pointer)
+    response = gh_post_request(s,url,data)
+    print(response)
+
+if __name__ == '__main__':
+    gh_user = 'rkaufman13'
+    repo_name = 'Brookland-recipe-buddy'
+
+    s = gh_sesh(gh_user, api_key)
+    main_sha = get_branch_sha(s, gh_user,repo_name,"main")
+    new_branch, new_ref = create_new_branch(s, gh_user, repo_name, main_sha)
+    new_sha = create_tree(s, gh_user, repo_name,new_branch.get('object').get('sha'))
+    new_commit = create_commit(s,gh_user,repo_name,new_sha, main_sha)
+    update_ref_pointer(s,gh_user,repo_name,new_ref,new_commit)
