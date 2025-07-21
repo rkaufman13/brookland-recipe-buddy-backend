@@ -108,13 +108,10 @@ def update_ref_pointer(new_ref,new_sha):
     response = gh_post_request(s,url,data)
     print(response)
 
-if __name__ == '__main__':
-    gh_user = 'rkaufman13'
-    repo_name = 'Brookland-recipe-buddy'
+def do_the_thing():
+    main_sha = get_branch_sha("main")
+    new_branch,new_ref = create_new_branch(main_sha)
+    new_sha = create_tree(new_branch.get('object').get('sha'))
+    new_commit = create_commit(new_sha, main_sha)
+    update_ref_pointer(new_ref,new_commit)
 
-    s = gh_sesh(gh_user, api_key)
-    main_sha = get_branch_sha(s, gh_user,repo_name,"main")
-    new_branch, new_ref = create_new_branch(s, gh_user, repo_name, main_sha)
-    new_sha = create_tree(s, gh_user, repo_name,new_branch.get('object').get('sha'))
-    new_commit = create_commit(s,gh_user,repo_name,new_sha, main_sha)
-    update_ref_pointer(s,gh_user,repo_name,new_ref,new_commit)
