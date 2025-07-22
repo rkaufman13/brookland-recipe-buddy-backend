@@ -1,16 +1,11 @@
 
 from fastapi import FastAPI
-from functools import lru_cache
 from pydantic import BaseModel,Field
-from config import Settings
+from config import get_settings
 from validators import contains_url
 from recipe_parsing import parse_recipe
 from templatizer import generate_and_encode_template
 from github_api_helpers import do_the_thing
-
-@lru_cache
-def get_settings():
-    return Settings()
 
 
 settings = get_settings()
@@ -41,7 +36,7 @@ async def root():
 @app.post("/incoming-message")
 async def parse_message(message:IncomingEmail):
     message_body = message.payload.stripped_text
-    message_sender = message.payload.from_email
+    message_sender = message.payload.from_email.split(" ")[0]
     recipe_url = contains_url(message_body)
     if not recipe_url:
         return {"message": "no url found"}

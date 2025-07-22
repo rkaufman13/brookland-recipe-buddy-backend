@@ -1,7 +1,7 @@
 import json
 import datetime
 import requests
-from start import get_settings
+from config import get_settings
 
 settings = get_settings()
 api_key = settings.github_api_key
@@ -62,7 +62,7 @@ def get_branch_sha(branch_name="master"):
     sha = response.json_all['commit']['sha']
     return sha
 
-def create_tree(base_tree_sha, path, content):
+def create_tree(base_tree_sha, content, path):
     url = f'https://api.github.com/repos/{GITHUB_USER}/{REPO_NAME}/git/trees'
     new_tree = {
         "base_tree": base_tree_sha,
@@ -115,3 +115,6 @@ def do_the_thing(content, filename):
     new_commit = create_commit(new_sha, main_sha)
     update_ref_pointer(new_ref,new_commit)
 
+
+if __name__== '__main__':
+    do_the_thing("come on this is a test",'whatever.md')
