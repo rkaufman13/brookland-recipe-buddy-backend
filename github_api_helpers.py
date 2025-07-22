@@ -106,7 +106,13 @@ def update_ref_pointer(new_ref,new_sha):
     new_pointer = {"sha":new_sha,"force":True}
     data = json.dumps(new_pointer)
     response = gh_post_request(s,url,data)
-    print(response)
+
+def create_pull_request(new_branch_name,branch_title):
+    url = f'https://api.github.com/repos/{GITHUB_USER}/{REPO_NAME}/pulls'
+    pr = {"title":branch_title,"body":"Generated via api","head":new_branch_name,"base":"main"}
+    data = json.dumps(pr)
+    response = gh_post_request(s,url, data)
+
 
 def do_the_thing(content, filename):
     main_sha = get_branch_sha("main")
@@ -114,6 +120,7 @@ def do_the_thing(content, filename):
     new_sha = create_tree(new_branch.get('object').get('sha'), content, filename)
     new_commit = create_commit(new_sha, main_sha)
     update_ref_pointer(new_ref,new_commit)
+    create_pull_request(new_branch, filename)
 
 
 if __name__== '__main__':
