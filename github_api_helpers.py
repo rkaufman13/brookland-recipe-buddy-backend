@@ -92,7 +92,7 @@ def create_new_branch(master_branch_sha):
 
     response = gh_post_request(s, url, data)
 
-    return response, ref
+    return response, ref, new_sync_branch
 
 
 def create_commit(new_sha, main_sha):
@@ -123,11 +123,11 @@ def create_pull_request(new_branch_name, branch_title):
 
 def do_the_thing(content, filename):
     main_sha = get_branch_sha("main")
-    new_branch, new_ref = create_new_branch(main_sha)
+    new_branch, new_ref, branch_name = create_new_branch(main_sha)
     new_sha = create_tree(new_branch.get('object').get('sha'), content, filename)
     new_commit = create_commit(new_sha, main_sha)
     update_ref_pointer(new_ref, new_commit)
-    create_pull_request(new_branch, filename)
+    create_pull_request(branch_name, filename)
 
 
 if __name__ == '__main__':
