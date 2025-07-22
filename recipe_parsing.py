@@ -12,10 +12,11 @@ def parse_recipe(url):
             "total_time": scraper.total_time(),
             "description": scraper.description(),
             "site_name": scraper.site_name(),
-            "canonical_url": scraper.canonical_url()
+            "canonical_url": scraper.canonical_url(),
+            "servings": scraper.yields()
         }
 
-    except: #YOU'RE a too broad exception clause
+    except:
         print(f"No recipe found at {url}")
         return None
 

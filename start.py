@@ -6,6 +6,7 @@ from config import Settings
 from validators import contains_url
 from recipe_parsing import parse_recipe
 from templatizer import generate_and_encode_template
+from github_api_helpers import do_the_thing
 
 @lru_cache
 def get_settings():
@@ -47,7 +48,8 @@ async def parse_message(message:IncomingEmail):
     recipe = parse_recipe(recipe_url)
     if not recipe:
         return {"message": "no recipe found at URL"}
-    encoded_template = generate_and_encode_template(recipe, message_sender)
+    encoded_template, filename = generate_and_encode_template(recipe, message_sender)
+    do_the_thing(encoded_template, filename)
     return {"message": "this was valid"}
 
 

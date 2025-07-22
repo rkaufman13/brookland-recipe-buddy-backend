@@ -62,11 +62,11 @@ def get_branch_sha(branch_name="master"):
     sha = response.json_all['commit']['sha']
     return sha
 
-def create_tree(base_tree_sha):
+def create_tree(base_tree_sha, path, content):
     url = f'https://api.github.com/repos/{GITHUB_USER}/{REPO_NAME}/git/trees'
     new_tree = {
         "base_tree": base_tree_sha,
-        "tree": [{"path":"file.rb","mode":"100644","type":"blob","content":"hi i'm a thing"}]
+        "tree": [{"path":f"_posts/{path}","mode":"100644","type":"blob","content":content}]
     }
     data = json.dumps(new_tree)
     response = gh_post_request(s, url, data)
@@ -108,10 +108,10 @@ def update_ref_pointer(new_ref,new_sha):
     response = gh_post_request(s,url,data)
     print(response)
 
-def do_the_thing():
+def do_the_thing(content, filename):
     main_sha = get_branch_sha("main")
     new_branch,new_ref = create_new_branch(main_sha)
-    new_sha = create_tree(new_branch.get('object').get('sha'))
+    new_sha = create_tree(new_branch.get('object').get('sha'), content, filename)
     new_commit = create_commit(new_sha, main_sha)
     update_ref_pointer(new_ref,new_commit)
 
