@@ -16,10 +16,12 @@ def gh_sesh(user, token):
     s.headers = {'accept': 'application/vnd.github.v3+json'}
     return s
 
+
 class GithubResponseObj:
     def __init__(self, json_all, next_page):
         self.json_all = json_all
         self.next_page = next_page
+
 
 def gh_get_request(s, url):
     response = s.get(url)
@@ -40,6 +42,7 @@ def gh_get_request(s, url):
 
     return full
 
+
 def gh_post_request(s, url, data):
     response = s.post(url, data)
     response_status = response.status_code
@@ -51,26 +54,27 @@ def gh_post_request(s, url, data):
 
     return json
 
+
 s = gh_sesh(GITHUB_USER, api_key)
 
 
-
 def get_branch_sha(branch_name="master"):
-
     url = f'https://api.github.com/repos/{GITHUB_USER}/{REPO_NAME}/branches/{branch_name}'
-    response =gh_get_request(s, url)
+    response = gh_get_request(s, url)
     sha = response.json_all['commit']['sha']
     return sha
+
 
 def create_tree(base_tree_sha, content, path):
     url = f'https://api.github.com/repos/{GITHUB_USER}/{REPO_NAME}/git/trees'
     new_tree = {
         "base_tree": base_tree_sha,
-        "tree": [{"path":f"_posts/{path}","mode":"100644","type":"blob","content":content}]
+        "tree": [{"path": f"_posts/{path}", "mode": "100644", "type": "blob", "content": content}]
     }
     data = json.dumps(new_tree)
     response = gh_post_request(s, url, data)
     return response.get('sha')
+
 
 def create_new_branch(master_branch_sha):
     now = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M")
@@ -86,9 +90,10 @@ def create_new_branch(master_branch_sha):
 
     data = json.dumps(data)
 
-    response =gh_post_request(s, url, data)
+    response = gh_post_request(s, url, data)
 
     return response, ref
+
 
 def create_commit(new_sha, main_sha):
     url = f' https://api.github.com/repos/{GITHUB_USER}/{REPO_NAME}/git/commits'
@@ -98,30 +103,32 @@ def create_commit(new_sha, main_sha):
         'tree': new_sha
     }
     data = json.dumps(commit)
-    response = gh_post_request(s,url, data)
+    response = gh_post_request(s, url, data)
     return response.get('sha')
 
-def update_ref_pointer(new_ref,new_sha):
-    url = f'https://api.github.com/repos/{GITHUB_USER}/{REPO_NAME}/git/refs/{new_ref}'
-    new_pointer = {"sha":new_sha,"force":True}
-    data = json.dumps(new_pointer)
-    response = gh_post_request(s,url,data)
 
-def create_pull_request(new_branch_name,branch_title):
+def update_ref_pointer(new_ref, new_sha):
+    url = f'https://api.github.com/repos/{GITHUB_USER}/{REPO_NAME}/git/refs/{new_ref}'
+    new_pointer = {"sha": new_sha, "force": True}
+    data = json.dumps(new_pointer)
+    response = gh_post_request(s, url, data)
+
+
+def create_pull_request(new_branch_name, branch_title):
     url = f'https://api.github.com/repos/{GITHUB_USER}/{REPO_NAME}/pulls'
-    pr = {"title":branch_title,"body":"Generated via api","head":new_branch_name,"base":"main"}
+    pr = {"title": branch_title, "body": "Generated via api", "head": new_branch_name, "base": "main"}
     data = json.dumps(pr)
-    response = gh_post_request(s,url, data)
+    response = gh_post_request(s, url, data)
 
 
 def do_the_thing(content, filename):
     main_sha = get_branch_sha("main")
-    new_branch,new_ref = create_new_branch(main_sha)
+    new_branch, new_ref = create_new_branch(main_sha)
     new_sha = create_tree(new_branch.get('object').get('sha'), content, filename)
     new_commit = create_commit(new_sha, main_sha)
-    update_ref_pointer(new_ref,new_commit)
+    update_ref_pointer(new_ref, new_commit)
     create_pull_request(new_branch, filename)
 
 
-if __name__== '__main__':
-    do_the_thing("come on this is a test",'whatever.md')
+if __name__ == '__main__':
+    do_the_thing("come on this is a test", 'whatever.md')
