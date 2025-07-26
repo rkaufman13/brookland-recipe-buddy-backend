@@ -18,7 +18,7 @@ def generate_and_encode_template(recipe, sender):
     short_title = "-".join(recipe.get('title').lower().split(" ")[:3])
     filename = f'{today}-{short_title}.md'
     ingredients_as_bullets = " - " + "\n - ".join(recipe.get("ingredients"))
-    instructions_as_paragraphs = "\n".join(recipe.get("instructions"))
+    instructions_as_paragraphs = "\n\n".join(recipe.get("instructions"))
     with (open('recipe-template.markdown', 'r') as template):
         buffer = template.read()
         buffer = buffer.replace(RECIPE_TITLE, recipe.get("title")).replace(RECIPE_SOURCE,
