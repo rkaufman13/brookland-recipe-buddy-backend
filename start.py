@@ -14,15 +14,15 @@ pattern = f"{settings.admin_email}"
 github_api_key = settings.github_api_key
 
 
-class RecipientEmail(BaseModel):
-    address: str = Field(..., pattern=pattern)
+# class RecipientEmail(BaseModel):
+#     address:
 
 
 class EmailPayload(BaseModel):
     Date: str
     from_email: str = Field(..., alias="from")
     stripped_text: str = Field(..., alias="stripped-text")
-    recipient: RecipientEmail
+    recipient: str = Field(..., pattern=pattern)
 
 
 class IncomingEmail(BaseModel):
