@@ -14,10 +14,6 @@ pattern = f"{settings.admin_email}"
 github_api_key = settings.github_api_key
 
 
-# class RecipientEmail(BaseModel):
-#     address:
-
-
 class EmailPayload(BaseModel):
     Date: str
     from_email: str = Field(..., alias="from")
@@ -54,7 +50,7 @@ async def parse_message(message: IncomingEmail):
         return {"message": "no url found"}
     recipe = parse_recipe(recipe_url)
     if not recipe:
-        return {"message": "no recipe found at URL"}
+        return {"message": f"no recipe found at URL {recipe_url}"}
     encoded_template, filename = generate_and_encode_template(recipe, message_sender)
     do_the_thing(encoded_template, filename)
     return {"message": "this was valid"}
