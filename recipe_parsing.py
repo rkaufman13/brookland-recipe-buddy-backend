@@ -7,7 +7,7 @@ def parse_recipe(url):
         scraper = scrape_me(url)
         recipe = {
             "title": scraper.title(),
-            "instructions": scraper.instructions_list(),
+            "instructions": scraper.instructions(),
             "ingredients": scraper.ingredients(),
             "description": scraper.description(),
             "site_name": scraper.site_name(),
