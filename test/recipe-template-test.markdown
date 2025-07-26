@@ -1,5 +1,3 @@
----
-layout: post
 title:  {{title}}
 source_site: {{source_site}}
 source_url: {{canonical_url}}
@@ -15,14 +13,5 @@ total_time: {{total_time}} minutes
 submitter: {{submitter_name}}
 servings: {{servings}}
 description:  {{description}}
-
----
-
-
-### Ingredients
-
-{{ingredients}}
-
-### Instructions
-
-{{instructions}}
+ingredients: {{ingredients}}
+instructions: {{instructions}}

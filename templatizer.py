@@ -12,6 +12,7 @@ RECIPE_DESCRIPTION = "{{description}}"
 INGREDIENTS = "{{ingredients}}"
 INSTRUCTIONS = "{{instructions}}"
 
+TEMPLATE_FILE='recipe-template.markdown'
 
 def generate_and_encode_template(recipe, sender):
     today = datetime.date.today().strftime('%Y-%m-%d')
@@ -19,14 +20,14 @@ def generate_and_encode_template(recipe, sender):
     filename = f'{today}-{short_title}.md'
     ingredients_as_bullets = " - " + "\n - ".join(recipe.get("ingredients"))
     instructions_as_paragraphs = "\n\n".join(recipe.get("instructions"))
-    with (open('recipe-template.markdown', 'r') as template):
+    with (open(TEMPLATE_FILE, 'r') as template):
         buffer = template.read()
         buffer = buffer.replace(RECIPE_TITLE, recipe.get("title")).replace(RECIPE_SOURCE,
                                                                            recipe.get("site_name")).replace(RECIPE_URL,
                                                                                                             recipe.get(
                                                                                                                 "canonical_url")).replace(
-            COOK_TIME, str(recipe.get("cook_time"))).replace(PREP_TIME, str(recipe.get("prep_time"))).replace(
-            TOTAL_TIME, str(recipe.get("total_time"))).replace(RECIPE_SUBMITTER, sender).replace(RECIPE_SERVINGS,
+            COOK_TIME, str(recipe.get("cook_time",""))).replace(PREP_TIME, str(recipe.get("prep_time",""))).replace(
+            TOTAL_TIME, str(recipe.get("total_time",""))).replace(RECIPE_SUBMITTER, sender).replace(RECIPE_SERVINGS,
                                                                                                  str(recipe.get(
                                                                                                      "servings"))).replace(
             RECIPE_DESCRIPTION, recipe.get("description")).replace(INSTRUCTIONS, instructions_as_paragraphs).replace(
