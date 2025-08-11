@@ -44,7 +44,7 @@ async def root():
 @app.post("/incoming-message")
 async def parse_message(message: IncomingEmail):
     message_body = message.payload.stripped_text
-    message_sender = message.payload.from_email.split(" ")[0]
+    message_sender = message.payload.from_email.split(" ")[0].replace("\"","")
     recipe_url = contains_url(message_body)
     if not recipe_url:
         return {"message": "no url found"}
