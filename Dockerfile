@@ -4,6 +4,9 @@ RUN apt-get update \
 WORKDIR /app
 COPY requirements.txt ./
 COPY app/ ./
-COPY .env ./
+
+ENV ADMIN_EMAIL $ADMIN_EMAIL
+ENV GITHUB_API_KEY $GITHUB_API_KEY
+
 RUN pip install --no-cache-dir -r requirements.txt
 CMD ["python", "start.py"]
